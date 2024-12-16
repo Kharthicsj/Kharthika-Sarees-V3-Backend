@@ -35,7 +35,8 @@ async function LoginController(req, res) {
 
             const tokenOption = {
                 httpOnly : true,
-                secure : true
+                secure : true,
+                sameSite: 'None',
             }
 
             return res.cookie("token", token, tokenOption).status(201).json({
