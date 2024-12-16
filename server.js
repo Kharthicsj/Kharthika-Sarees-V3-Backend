@@ -9,7 +9,7 @@ import session from 'express-session';
 const app = express();
 
 app.use(cors({
-    origin : ["http://localhost:3000"],
+    origin : ["http://localhost:3000", "https://kharthikasarees-x6e5.onrender.com", "https://kharthikasarees.com"],
     credentials : true
 }));
 
