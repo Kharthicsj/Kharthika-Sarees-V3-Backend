@@ -4,7 +4,7 @@ async function Logout(req, res){
             path: "/", 
             httpOnly: true, 
             sameSite: "None", 
-            secure: process.env.NODE_ENV === 'production',
+            secure : true,
             domain: "kharthika-sarees-v3-backend.onrender.com"
         });
 
