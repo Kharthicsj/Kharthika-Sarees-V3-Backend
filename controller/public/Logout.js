@@ -3,7 +3,7 @@ async function Logout(req, res){
         res.clearCookie("token", { 
             path: "/", 
             httpOnly: true, 
-            sameSite: "strict", 
+            sameSite: "None", 
             secure: process.env.NODE_ENV === 'production',
             domain: "kharthika-sarees-v3-backend.onrender.com"
         });
