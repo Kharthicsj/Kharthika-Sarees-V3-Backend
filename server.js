@@ -18,10 +18,9 @@ app.use(cors({
 app.options('*', cors());
 
 app.use((req, res, next) => {
-    res.setHeader("Content-Security-Policy", "prefetch-src" , "default-src 'self';");
+    res.setHeader("Content-Security-Policy", "default-src 'self';");
     next();
 });
-
 
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
