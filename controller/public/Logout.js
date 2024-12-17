@@ -1,6 +1,12 @@
 async function Logout(req, res){
     try{
-        res.clearCookie("token", { path: "/", httpOnly: true, sameSite: "strict" });
+        res.clearCookie("token", { 
+            path: "/", 
+            httpOnly: true, 
+            sameSite: "strict", 
+            secure: true, 
+            domain: ["kharthika-sarees-v3-backend.onrender.com"]
+        });
 
         return res.json({
             success : true,
