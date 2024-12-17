@@ -46,18 +46,20 @@ async function paymentController(req, res) {
             },
         };
 
-        axios.request(options).then(function (response) {
-            const redirectInfo = response.data.data.instrumentResponse.redirectInfo;
-            console.log("Redirect Info:", redirectInfo);
-            res.json({
-                redirectUrl: redirectInfo.url,
-            });
-        })
+        // Make the request to PhonePe API from your backend
+        axios
+            .request(options)
+            .then(function (response) {
+                // Send the redirect URL to the frontend
+                console.log(response.data);
+                res.json({
+                    redirectUrl: response.data.data.instrumentResponse.redirectInfo.url,
+                });
+            })
             .catch(function (error) {
                 console.error(error);
                 res.status(500).send({ message: error.message, success: false });
             });
-
     } catch (error) {
         res.status(500).send({ message: error.message, success: false });
     }
