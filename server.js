@@ -18,6 +18,12 @@ app.use(cors({
 app.options('*', cors());
 
 app.use((req, res, next) => {
+    res.setHeader("Content-Security-Policy", "default-src 'self';");
+    next();
+});
+
+
+app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
     res.header("Access-Control-Allow-Credentials", "true");
     res.header("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT,DELETE");
