@@ -57,7 +57,7 @@ router.post("/signup",SignupController)
 router.post("/login",LoginController)
 router.get("/account-details", authToken, accountDetails)
 router.post("/update-account-details", authToken, updateAccountDetails)
-router.get("/logout", Logout)
+router.get("/logout", authToken, Logout)
 router.post("/reset-password", resetPassword)
 
 router.post("/otp", otpController)
