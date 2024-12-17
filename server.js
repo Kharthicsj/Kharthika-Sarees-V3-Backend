@@ -10,16 +10,13 @@ dotenv.config();
 
 const app = express();
 
-// CORS Middleware
 app.use(cors({
     origin: ["http://localhost:3000", "https://kharthikasarees-x6e5.onrender.com", "https://kharthikasarees.com"],
     credentials: true,
 }));
 
-// Handle Preflight Requests
 app.options('*', cors());
 
-// Add Headers Manually (Optional)
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
     res.header("Access-Control-Allow-Credentials", "true");
@@ -28,7 +25,6 @@ app.use((req, res, next) => {
     next();
 });
 
-// Other Middlewares
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 app.use(cookieParser());
@@ -39,7 +35,6 @@ app.use(session({
     cookie: { maxAge: 60 * 60 * 1000 },
 }));
 
-// Connect to MongoDB
 const connectDB = async () => {
     try {
         await mongoose.connect(process.env.DB);
@@ -49,10 +44,8 @@ const connectDB = async () => {
     }
 };
 
-// Routes
 app.use("/", router);
 
-// Start Server
 const port = process.env.PORT || 4000;
 app.listen(port, () => {
     connectDB();

@@ -1,6 +1,6 @@
 async function Logout(req, res){
     try{
-        res.clearCookie("token")
+        res.clearCookie("token", { path: "/", httpOnly: true, sameSite: "strict" });
 
         return res.json({
             success : true,
