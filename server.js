@@ -18,18 +18,22 @@ app.use(cors({
 
 app.options('*', cors());
 
-// Content Security Policy Setup
 app.use((req, res, next) => {
-    res.setHeader("Content-Security-Policy", 
-        "default-src 'self'; " +
-        "script-src 'self' https://api.phonepe.com; " + // Allow PhonePe scripts
-        "style-src 'self'; " +
-        "img-src 'self' https://example.com; " + // Allow images from example.com
-        "font-src 'self';" 
+    res.setHeader(
+        "Content-Security-Policy",
+        [
+            "default-src 'self';",
+            "script-src 'self' https://api.phonepe.com;",
+            "style-src 'self';",
+            "img-src 'self' https://example.com;",
+            "font-src 'self';",
+            "connect-src 'self' https://api.phonepe.com;",
+            "frame-src 'self' https://api.phonepe.com;",
+            "report-uri /csp-violations;"
+        ].join(" ")
     );
     next();
 });
-
 
 // Setting Access-Control-Allow-Headers for pre-flight requests
 app.use((req, res, next) => {
