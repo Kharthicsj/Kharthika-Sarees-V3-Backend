@@ -94,7 +94,7 @@ async function newOrder(req, res) {
       from: process.env.GMAIL_USER,
       to: userEmail,
       subject: "Order Confirmation - Kharthika Sarees",
-      text: `Dear ${user.name},\n\nThank you for your order. Here are the details:\n\n${productDetails}\n\nTotal Price: ₹${totalPrice}\nAddress: ${address}\nTransaction ID: ${transactionId}\n\nYour order is currently being processed.\n\nThank you for shopping with us!\n\nBest Regards,\nKharthika Sarees Team`,
+      text: `Dear ${user.name},\n\nThank you for your order. Here are the details:\n\n${productDetailsHTML}\n\nTotal Price: ₹${totalPrice}\nAddress: ${address}\nTransaction ID: ${transactionId}\n\nYour order is currently being processed.\n\nThank you for shopping with us!\n\nBest Regards,\nKharthika Sarees Team`,
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
           <div style="text-align: center; padding: 20px; background-color: #f8f9fa; border-bottom: 2px solid #e2e3e5;">
@@ -125,7 +125,7 @@ async function newOrder(req, res) {
       from: process.env.GMAIL_USER,
       to: process.env.GMAIL_USER,
       subject: "New Order Received - Kharthika Sarees",
-      text: `New order received from ${user.name} (${userEmail}):\n\n${productDetails}\n\nTotal Price: ₹${totalPrice}\nAddress: ${address}\nTransaction ID: ${transactionId}\n\nCheck the admin panel for more details.`,
+      text: `New order received from ${user.name} (${userEmail}):\n\n${productDetailsHTML}\n\nTotal Price: ₹${totalPrice}\nAddress: ${address}\nTransaction ID: ${transactionId}\n\nCheck the admin panel for more details.`,
       html: `
       <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
         <div style="text-align: center; padding: 20px; background-color: #f8f9fa; border-bottom: 2px solid #e2e3e5;">
