@@ -4,98 +4,110 @@ import productModel from "../../models/ProductModel.js";
 import userModel from "../../models/User.js";
 
 async function newOrder(req, res) {
-  try {
-    const userId = req.userId;
-    const { products, totalPrice, address, transactionId } = req.body;
+	try {
+		const userId = req.userId;
+		const { products, totalPrice, address, transactionId } = req.body;
 
-    // Check if all required fields are present
-    if (!products || !Array.isArray(products) || products.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid products data. Ensure products are provided.",
-      });
-    }
-    if (!totalPrice || !address || !transactionId) {
-      return res.status(400).json({
-        success: false,
-        message: "Missing totalPrice, address, or transactionId.",
-      });
-    }
+		// Check if all required fields are present
+		if (!products || !Array.isArray(products) || products.length === 0) {
+			return res.status(400).json({
+				success: false,
+				message: "Invalid products data. Ensure products are provided.",
+			});
+		}
+		if (!totalPrice || !address || !transactionId) {
+			return res.status(400).json({
+				success: false,
+				message: "Missing totalPrice, address, or transactionId.",
+			});
+		}
 
-    // Fetch user's email
-    const user = await userModel.findById(userId);
-    if (!user) {
-      return res.status(400).json({
-        success: false,
-        message: "User not found.",
-      });
-    }
-    const userEmail = user.email;
+		// Fetch user's email
+		const user = await userModel.findById(userId);
+		if (!user) {
+			return res.status(400).json({
+				success: false,
+				message: "User not found.",
+			});
+		}
+		const userEmail = user.email;
 
-    // Validate and process the products array
-    const validProducts = products.map((product) => ({
-      ...product,
-      quantity: product.quantity || 0, // Ensure quantity is present
-    }));
+		// Validate and process the products array
+		const validProducts = products.map((product) => ({
+			...product,
+			quantity: product.quantity || 0, // Ensure quantity is present
+		}));
 
-    // Reduce the quantity in the product model
-    for (const product of validProducts) {
-      const productId = product._id || product.productId;
-      const orderQuantity = product.quantity;
+		// Reduce the quantity in the product model
+		for (const product of validProducts) {
+			const productId = product._id || product.productId;
+			const orderQuantity = product.quantity;
 
-      const existingProduct = await productModel.findById(productId);
-      if (!existingProduct) {
-        return res.status(400).json({
-          success: false,
-          message: `Product with ID ${productId} not found.`,
-        });
-      }
-      if (existingProduct.quantity < orderQuantity) {
-        return res.status(400).json({
-          success: false,
-          message: `Insufficient stock for product ${existingProduct.productName}.`,
-        });
-      }
+			const existingProduct = await productModel.findById(productId);
+			if (!existingProduct) {
+				return res.status(400).json({
+					success: false,
+					message: `Product with ID ${productId} not found.`,
+				});
+			}
+			if (existingProduct.quantity < orderQuantity) {
+				return res.status(400).json({
+					success: false,
+					message: `Insufficient stock for product ${existingProduct.productName}.`,
+				});
+			}
 
-      existingProduct.quantity -= orderQuantity;
-      await existingProduct.save();
-    }
+			existingProduct.quantity -= orderQuantity;
+			await existingProduct.save();
+		}
 
-    // Create a new order
-    const newOrder = new orderModel({
-      userId,
-      product: validProducts,
-      total: totalPrice,
-      address,
-      transactionId,
-      orderStatus: "Pending",
-    });
+		// Create a new order
+		const newOrder = new orderModel({
+			userId,
+			product: validProducts,
+			total: totalPrice,
+			address,
+			transactionId,
+			orderStatus: "Pending",
+		});
 
-    await newOrder.save();
+		await newOrder.save();
 
-    // Set up Nodemailer transporter
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.APP_PASSWORD,
-      },
-    });
+		// Set up Nodemailer transporter
+		const transporter = nodemailer.createTransport({
+			service: "gmail",
+			auth: {
+				user: process.env.GMAIL_USER,
+				pass: process.env.APP_PASSWORD,
+			},
+		});
 
-    // Prepare email content
-    const productDetailsHTML = validProducts
-      .map(
-        (prod) =>
-          `<li><strong>Product:</strong> ${prod.name || prod.productName} <br/><strong>Quantity:</strong> ${prod.quantity}</li>`
-      )
-      .join("");
+		// Prepare email content
+		const productDetailsHTML = validProducts
+			.map(
+				(prod) =>
+					`<li><strong>Product:</strong> ${prod.name || prod.productName} <br/><strong>Quantity:</strong> ${prod.quantity}</li>`
+			)
+			.join("");
 
-    const mailOptionsUser = {
-      from: process.env.GMAIL_USER,
-      to: userEmail,
-      subject: "Order Confirmation - Kharthika Sarees",
-      text: `Dear ${user.name},\n\nThank you for your order. Here are the details:\n\n${productDetailsHTML}\n\nTotal Price: ₹${totalPrice}\nAddress: ${address}\nTransaction ID: ${transactionId}\n\nYour order is currently being processed.\n\nThank you for shopping with us!\n\nBest Regards,\nKharthika Sarees Team`,
-      html: `
+		// Format the address object into a string
+		const formattedAddress = `
+				<p><strong>Full Name:</strong> ${address.fullname}</p>
+				<p><strong>Address:</strong> ${address.addressContent}</p>
+				<p><strong>Landmark:</strong> ${address.landmark || "N/A"}</p>
+				<p><strong>City/State:</strong> ${address.state}</p>
+				<p><strong>Pincode:</strong> ${address.pincode}</p>
+				<p><strong>Phone:</strong> ${address.phone}</p>
+				<p><strong>Email:</strong> ${address.email}</p>
+			`;
+
+
+		const mailOptionsUser = {
+			from: process.env.GMAIL_USER,
+			to: userEmail,
+			subject: "Order Confirmation - Kharthika Sarees",
+			text: `Dear ${user.name},\n\nThank you for your order. Here are the details:\n\n${productDetailsHTML}\n\nTotal Price: ₹${totalPrice}\nAddress: ${address}\nTransaction ID: ${transactionId}\n\nYour order is currently being processed.\n\nThank you for shopping with us!\n\nBest Regards,\nKharthika Sarees Team`,
+			html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
           <div style="text-align: center; padding: 20px; background-color: #f8f9fa; border-bottom: 2px solid #e2e3e5;">
             <h1 style="color: #ff6347;">Kharthika Sarees</h1>
@@ -108,7 +120,7 @@ async function newOrder(req, res) {
               ${productDetailsHTML}
             </ul>
             <p><strong>Total Price:</strong> ₹${totalPrice}</p>
-            <p><strong>Delivery Address:</strong> ${address}</p>
+            <p><strong>Delivery Address:</strong> ${formattedAddress}</p>
             <p><strong>Transaction ID:</strong> ${transactionId}</p>
             <hr/>
             <p>We will notify you once your order is shipped.</p>
@@ -119,14 +131,14 @@ async function newOrder(req, res) {
           </div>
         </div>
         `,
-    };
+		};
 
-    const mailOptionsAdmin = {
-      from: process.env.GMAIL_USER,
-      to: process.env.GMAIL_USER,
-      subject: "New Order Received - Kharthika Sarees",
-      text: `New order received from ${user.name} (${userEmail}):\n\n${productDetailsHTML}\n\nTotal Price: ₹${totalPrice}\nAddress: ${address}\nTransaction ID: ${transactionId}\n\nCheck the admin panel for more details.`,
-      html: `
+		const mailOptionsAdmin = {
+			from: process.env.GMAIL_USER,
+			to: process.env.GMAIL_USER,
+			subject: "New Order Received - Kharthika Sarees",
+			text: `New order received from ${user.name} (${userEmail}):\n\n${productDetailsHTML}\n\nTotal Price: ₹${totalPrice}\nAddress: ${address}\nTransaction ID: ${transactionId}\n\nCheck the admin panel for more details.`,
+			html: `
       <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
         <div style="text-align: center; padding: 20px; background-color: #f8f9fa; border-bottom: 2px solid #e2e3e5;">
           <h1 style="color: #ff6347;">Kharthika Sarees</h1>
@@ -140,7 +152,7 @@ async function newOrder(req, res) {
             ${productDetailsHTML}
           </ul>
           <p><strong>Total Price:</strong> ₹${totalPrice}</p>
-          <p><strong>Delivery Address:</strong> ${address}</p>
+          <p><strong>Delivery Address:</strong> ${formattedAddress}</p>
           <p><strong>Transaction ID:</strong> ${transactionId}</p>
           <hr/>
           <p style="margin-top: 20px;">Log in to the admin panel to view more details about this order.</p>
@@ -151,24 +163,24 @@ async function newOrder(req, res) {
         </div>
       </div>
       `,
-    };
+		};
 
-    await transporter.sendMail(mailOptionsUser);
-    await transporter.sendMail(mailOptionsAdmin);
+		await transporter.sendMail(mailOptionsUser);
+		await transporter.sendMail(mailOptionsAdmin);
 
-    return res.status(201).json({
-      success: true,
-      message: "Order placed successfully",
-      order: newOrder,
-    });
-  } catch (err) {
-    console.error("Error in newOrder:", err.message);
-    return res.status(400).json({
-      error: true,
-      success: false,
-      message: err.message || "Error while creating a new order",
-    });
-  }
+		return res.status(201).json({
+			success: true,
+			message: "Order placed successfully",
+			order: newOrder,
+		});
+	} catch (err) {
+		console.error("Error in newOrder:", err.message);
+		return res.status(400).json({
+			error: true,
+			success: false,
+			message: err.message || "Error while creating a new order",
+		});
+	}
 }
 
 export default newOrder;
