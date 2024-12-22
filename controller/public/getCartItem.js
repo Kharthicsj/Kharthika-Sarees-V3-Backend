@@ -37,7 +37,9 @@ async function getCartItems(req, res) {
         productImage: product.productImage[0], 
         description: product.description,
         total_quantity: product.quantity,
-        quantity_present: item.quantity_present
+        quantity_present: item.quantity_present,
+        category: product.category,
+        fabric: product.fabric,
       };
     });
 
